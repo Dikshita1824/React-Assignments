@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-
   workflow_dispatch:
 
 permissions:
@@ -33,7 +32,6 @@ jobs:
             react1/package-lock.json
             react2/package-lock.json
             react3/package-lock.json
-            Assignment4/package-lock.json
 
       - name: Build React Assignments
         shell: bash
@@ -42,62 +40,145 @@ jobs:
 
           mkdir -p site
 
-          for project in react1 react2 react3 Assignment4
-          do
-            echo "=============================="
-            echo "Building $project"
-            echo "=============================="
+          echo "=============================="
+          echo "Building react1"
+          echo "=============================="
 
-            cd "$GITHUB_WORKSPACE/$project"
+          cd "$GITHUB_WORKSPACE/react1"
+          npm install
+          npm run build -- --base="/React-Assignments/react1/"
 
-            npm install
-            npm run build -- --base="/React-Assignments/$project/"
+          mkdir -p "$GITHUB_WORKSPACE/site/react1"
+          cp -r dist/. "$GITHUB_WORKSPACE/site/react1/"
 
-            mkdir -p "$GITHUB_WORKSPACE/site/$project"
-            cp -r dist/. "$GITHUB_WORKSPACE/site/$project/"
-          done
+
+          echo "=============================="
+          echo "Building react2"
+          echo "=============================="
+
+          cd "$GITHUB_WORKSPACE/react2"
+          npm install
+          npm run build -- --base="/React-Assignments/react2/"
+
+          mkdir -p "$GITHUB_WORKSPACE/site/react2"
+          cp -r dist/. "$GITHUB_WORKSPACE/site/react2/"
+
+
+          echo "=============================="
+          echo "Building react3"
+          echo "=============================="
+
+          cd "$GITHUB_WORKSPACE/react3"
+          npm install
+          npm run build -- --base="/React-Assignments/react3/"
+
+          mkdir -p "$GITHUB_WORKSPACE/site/react3"
+          cp -r dist/. "$GITHUB_WORKSPACE/site/react3/"
+
+
+          echo "=============================="
+          echo "Adding Assignment4"
+          echo "=============================="
+
+          mkdir -p "$GITHUB_WORKSPACE/site/Assignment4"
+
+          cp "$GITHUB_WORKSPACE/Assignment4/tailwind.html" \
+             "$GITHUB_WORKSPACE/site/Assignment4/index.html"
+
 
       - name: Create Home Page
+        shell: bash
         run: |
           cat > site/index.html <<'EOF'
           <!DOCTYPE html>
-          <html>
+          <html lang="en">
           <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>React Assignments</title>
+
+            <style>
+              body {
+                font-family: Arial, sans-serif;
+                background: #f5f5f5;
+                padding: 40px;
+              }
+
+              h1 {
+                text-align: center;
+              }
+
+              ul {
+                max-width: 500px;
+                margin: 30px auto;
+                padding: 0;
+                list-style: none;
+              }
+
+              li {
+                margin: 15px 0;
+              }
+
+              a {
+                display: block;
+                padding: 15px;
+                background: white;
+                color: #222;
+                text-decoration: none;
+                border-radius: 8px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+              }
+
+              a:hover {
+                background: #eeeeee;
+              }
+            </style>
           </head>
+
           <body>
+
             <h1>React Assignments</h1>
 
             <ul>
               <li>
-                <a href="./react1/">React Assignment 1</a>
+                <a href="./react1/">
+                  React Assignment 1
+                </a>
               </li>
 
               <li>
-                <a href="./react2/">React Assignment 2</a>
+                <a href="./react2/">
+                  React Assignment 2
+                </a>
               </li>
 
               <li>
-                <a href="./react3/">React Assignment 3</a>
+                <a href="./react3/">
+                  React Assignment 3
+                </a>
               </li>
 
               <li>
-                <a href="./Assignment4/">React Assignment 4</a>
+                <a href="./Assignment4/">
+                  Assignment 4
+                </a>
               </li>
             </ul>
+
           </body>
           </html>
           EOF
 
+
       - name: Setup Pages
         uses: actions/configure-pages@v6
+
 
       - name: Upload Pages Artifact
         uses: actions/upload-pages-artifact@v4
         with:
           path: site
+
 
   deploy:
     needs: build
