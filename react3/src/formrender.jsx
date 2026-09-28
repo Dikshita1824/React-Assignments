@@ -1,6 +1,6 @@
 import { useState } from "react";
-import Form from "./Form.jsx"
-import "./Form.css"
+import Form from "./form.jsx"
+import "./form.css"
 
 export default function FormRender() {
   const [info, setInfo] = useState([]);
