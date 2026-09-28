@@ -1,0 +1,92 @@
+name: Deploy React Assignments
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build React Assignments
+        run: |
+          mkdir -p site
+
+          for project in react1 react2 react3 Assignment4
+          do
+            echo "Building $project..."
+
+            cd "$GITHUB_WORKSPACE/$project"
+
+            if [ -f package-lock.json ]; then
+              npm ci
+            else
+              npm install
+            fi
+
+            npm run build -- --base="/React-Assignments/$project/"
+
+            mkdir -p "$GITHUB_WORKSPACE/site/$project"
+            cp -r dist/* "$GITHUB_WORKSPACE/site/$project/"
+          done
+
+      - name: Create Home Page
+        run: |
+          cat > site/index.html <<'EOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>React Assignments</title>
+          </head>
+          <body>
+            <h1>React Assignments</h1>
+
+            <h2>My Projects</h2>
+
+            <ul>
+              <li><a href="./react1/">React Assignment 1</a></li>
+              <li><a href="./react2/">React Assignment 2</a></li>
+              <li><a href="./react3/">React Assignment 3</a></li>
+              <li><a href="./Assignment4/">React Assignment 4</a></li>
+            </ul>
+          </body>
+          </html>
+          EOF
+
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
