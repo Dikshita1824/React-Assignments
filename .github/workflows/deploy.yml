@@ -50,7 +50,7 @@ jobs:
 
             cd "$GITHUB_WORKSPACE/$project"
 
-            npm ci
+            npm install
             npm run build -- --base="/React-Assignments/$project/"
 
             mkdir -p "$GITHUB_WORKSPACE/site/$project"
